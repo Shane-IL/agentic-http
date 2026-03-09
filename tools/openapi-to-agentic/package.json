@@ -1,0 +1,16 @@
+{
+  "name": "@agentic-http/openapi-to-agentic",
+  "version": "0.1.0",
+  "description": "Bootstrap Agentic-HTTP agent-meta stubs from an OpenAPI spec",
+  "bin": {
+    "openapi-to-agentic": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js --help"
+  },
+  "keywords": ["agentic-http", "openapi", "codegen", "agent-meta"],
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

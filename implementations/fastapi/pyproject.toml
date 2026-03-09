@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentic-http-fastapi"
+version = "0.1.0"
+description = "FastAPI/Starlette decorator for Agentic-HTTP compliant APIs"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "starlette>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "uvicorn>=0.29",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

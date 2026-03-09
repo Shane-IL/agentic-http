@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-http.dev/spec/1.0/agent-meta.schema.json",
+  "title": "Agentic-HTTP agent-meta envelope",
+  "description": "Schema for the agent-meta object returned by Agentic-HTTP compliant endpoints",
+  "type": "object",
+  "required": ["version", "intent", "effect", "reversible", "idempotent", "retry-safe"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Agentic-HTTP schema version",
+      "enum": ["1.0"]
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Plain-language description of what this endpoint does, written for an agent reasoning about whether to call it"
+    },
+    "effect": {
+      "type": "string",
+      "enum": ["read", "write", "delete", "mixed"],
+      "description": "Category of state change this endpoint produces"
+    },
+    "reversible": {
+      "type": "boolean",
+      "description": "Whether the effects of this call can be undone via another API call"
+    },
+    "idempotent": {
+      "type": "boolean",
+      "description": "Whether calling this endpoint multiple times with the same input produces the same result"
+    },
+    "retry-safe": {
+      "type": "boolean",
+      "description": "Whether it is safe for the agent to automatically retry on transient failure"
+    },
+    "side-effects": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$",
+        "description": "Lowercase hyphenated label describing an observable side effect"
+      },
+      "description": "Machine-readable list of observable side effects beyond the primary response"
+    },
+    "preconditions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Natural-language conditions that should be true before calling this endpoint"
+    },
+    "typical-next": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^/"
+      },
+      "description": "Ordered list of endpoint paths typically called after this one"
+    },
+    "error-guidance": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[1-5][0-9]{2}$"
+      },
+      "additionalProperties": { "type": "string" },
+      "description": "Map of HTTP status codes to agent-readable recovery instructions"
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^x-[a-z][a-z0-9-]+-"
+      },
+      "description": "Namespaced extension fields. Keys must be prefixed x-{namespace}-"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@agentic-http/validator",
+  "version": "0.1.0",
+  "description": "CLI validator for Agentic-HTTP agent-meta objects",
+  "bin": {
+    "agentic-validate": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js --help"
+  },
+  "keywords": ["agentic-http", "validator", "cli", "agent-meta"],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}
