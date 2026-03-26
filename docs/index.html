@@ -522,32 +522,31 @@ Content-Type: application/json
     <p class="lead">A working user management API built on the Express reference implementation. Deploy your own copy to Vercel in one click — it auto-deploys from this repo.</p>
 
     <div class="deploy-section">
-      <h3>Deploy the reference API</h3>
-      <p>The demo API lives in <code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">examples/live-api/</code>. Connect your fork to Vercel and it redeploys on every push.</p>
+      <h3>Run the reference API</h3>
+      <p>Clone the repo and spin up the demo API with Docker or Node. No account or deployment needed.</p>
       <div class="deploy-btns">
         <a class="btn btn-primary"
-           href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FShane-IL%2Fagentic-http&root-directory=examples%2Flive-api&project-name=agentic-http-demo&demo-title=Agentic-HTTP+Demo+API"
-           target="_blank" rel="noopener">
-          ▲ Deploy to Vercel
-        </a>
-        <a class="btn btn-ghost"
            href="https://github.com/Shane-IL/agentic-http/tree/master/examples/live-api"
            target="_blank" rel="noopener">
           View source
         </a>
       </div>
 
-      <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.75rem;">Once deployed, try it with curl:</p>
+      <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.75rem;">Docker (quickest):</p>
+      <div class="curl-block">docker build -t agentic-http-demo examples/live-api
+docker run -p 3000:3000 agentic-http-demo</div>
+
+      <p style="font-size:0.8rem; color:#64748b; margin: 1rem 0 0.75rem;">Then try it:</p>
       <div class="curl-block"><span class="comment"># Standard call — no agent-meta returned</span>
-curl https://your-deployment.vercel.app/users
+curl http://localhost:3000/users
 
 <span class="comment"># Agent call — agent-meta appended to response</span>
-curl https://your-deployment.vercel.app/users \
+curl http://localhost:3000/users \
   -H "X-Agent-Client: true" \
   -H "X-Agent-Protocol: 1.0"
 
 <span class="comment"># Discovery endpoint</span>
-curl https://your-deployment.vercel.app/.well-known/agentic-http.json</div>
+curl http://localhost:3000/.well-known/agentic-http.json</div>
     </div>
   </div>
 </section>

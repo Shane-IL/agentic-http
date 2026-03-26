@@ -71,24 +71,31 @@ Content-Type: application/json
 
 ## Live Demo
 
-A working reference API (user management, four endpoints) is in [`examples/live-api/`](examples/live-api/). Deploy your own copy to Vercel in one click:
+A working reference API (user management, four endpoints) is in [`examples/live-api/`](examples/live-api/).
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FShane-IL%2Fagentic-http&root-directory=examples%2Flive-api&project-name=agentic-http-demo)
-
-Or run locally:
+**Docker (quickest)**
 ```bash
-cd examples/live-api
-npm install
-npm start
-# http://localhost:3000
+docker build -t agentic-http-demo examples/live-api
+docker run -p 3000:3000 agentic-http-demo
+```
 
-# Standard call
+**Node.js**
+```bash
+cd examples/live-api && npm install && npm start
+```
+
+Then try it:
+```bash
+# Standard call — no agent-meta
 curl http://localhost:3000/users
 
-# Agent call — returns agent-meta
+# Agent call — agent-meta returned
 curl http://localhost:3000/users \
   -H "X-Agent-Client: true" \
   -H "X-Agent-Protocol: 1.0"
+
+# Discovery
+curl http://localhost:3000/.well-known/agentic-http.json
 ```
 
 ---
