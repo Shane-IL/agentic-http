@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic-HTTP — Agent-native metadata for REST APIs</title>
+  <meta name="description" content="A minimal HTTP convention for surfacing semantic metadata to AI agent callers — inline, backward-compatible, no new infrastructure.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0f172a;
+      --indigo: #6366f1;
+      --indigo-light: #818cf8;
+      --gray-50:  #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--gray-700);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 2rem;
+      height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-weight: 700; font-size: 0.95rem;
+      color: var(--navy); text-decoration: none;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .nav-logo .chip {
+      font-size: 0.65rem; background: var(--indigo); color: #fff;
+      padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: 0.02em;
+    }
+    .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a { color: var(--gray-600); text-decoration: none; font-size: 0.875rem; }
+    .nav-links a:hover { color: var(--navy); }
+    .nav-gh {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: var(--navy); color: #fff;
+      padding: 0.4rem 1rem; border-radius: 6px;
+      font-size: 0.8rem; font-weight: 600; text-decoration: none;
+    }
+    .nav-gh:hover { background: #1e293b; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--navy); color: #fff;
+      padding: 6rem 2rem 5.5rem;
+      text-align: center;
+    }
+    .hero-pill {
+      display: inline-block;
+      background: rgba(99,102,241,0.18); color: var(--indigo-light);
+      font-size: 0.75rem; padding: 4px 14px; border-radius: 20px;
+      border: 1px solid rgba(99,102,241,0.35);
+      margin-bottom: 1.5rem; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+      line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.025em;
+    }
+    .hero h1 em { color: var(--indigo-light); font-style: normal; }
+    .hero p {
+      font-size: 1.1rem; color: #94a3b8;
+      max-width: 580px; margin: 0 auto 2.5rem; line-height: 1.75;
+    }
+    .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.35rem; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 600; text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--indigo); color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-ghost {
+      border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+    /* ── Sections ── */
+    .section { padding: 5rem 2rem; }
+    .section-inner { max-width: 960px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--indigo); font-weight: 700; margin-bottom: 0.6rem;
+    }
+    .section h2 {
+      font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 700;
+      color: var(--navy); margin-bottom: 0.9rem; letter-spacing: -0.02em;
+    }
+    .section .lead {
+      font-size: 1rem; color: var(--gray-600); max-width: 640px;
+      line-height: 1.75; margin-bottom: 2.5rem;
+    }
+    .bg-gray { background: var(--gray-50); }
+
+    /* ── OpenAPI comparison ── */
+    .compare-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .compare-card {
+      border: 1px solid var(--gray-200); border-radius: 12px;
+      padding: 1.6rem;
+    }
+    .compare-card.theirs { background: #fff; }
+    .compare-card.ours { border-color: var(--indigo); background: #fafaff; }
+    .compare-card h3 {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--gray-400);
+    }
+    .compare-card.ours h3 { color: var(--indigo); }
+    .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+    .compare-list li {
+      font-size: 0.9rem; color: var(--gray-600);
+      padding-left: 1.4rem; position: relative;
+    }
+    .compare-list li::before { content: '–'; position: absolute; left: 0; color: var(--gray-400); }
+    .compare-list.check li::before { content: '✓'; color: var(--indigo); font-weight: 700; }
+    .compare-note {
+      font-size: 0.85rem; color: var(--gray-600); line-height: 1.6;
+    }
+    .compare-note code {
+      font-family: var(--font-mono); font-size: 0.8rem;
+      background: var(--gray-100); padding: 2px 5px; border-radius: 3px;
+      color: var(--navy);
+    }
+
+    /* ── How it works ── */
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+    .step { text-align: center; }
+    .step-num {
+      width: 42px; height: 42px; background: var(--navy); color: #fff;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.95rem; margin: 0 auto 1rem;
+    }
+    .step h3 { font-size: 0.975rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+    .step p { font-size: 0.875rem; color: var(--gray-600); line-height: 1.65; }
+    .step p code {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      background: var(--gray-200); padding: 1px 5px; border-radius: 3px; color: var(--navy);
+    }
+
+    /* ── Code window ── */
+    .code-window {
+      background: #0d1117; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18); margin-top: 0.5rem;
+    }
+    .code-tabs {
+      display: flex; border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 0 1rem; background: #161b22;
+    }
+    .code-tab {
+      padding: 0.7rem 1rem; font-size: 0.8rem;
+      color: rgba(255,255,255,0.4); cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.15s;
+      user-select: none;
+    }
+    .code-tab.active { color: #fff; border-bottom-color: var(--indigo); }
+    .code-pane { display: none; padding: 1.5rem 1.75rem; }
+    .code-pane.active { display: block; }
+    .code-pane pre { margin: 0; font-size: 0.8rem !important; line-height: 1.7 !important; }
+    .code-pane pre code { background: transparent !important; padding: 0 !important; font-size: inherit !important; }
+    /* override hljs background */
+    .hljs { background: transparent !important; }
+
+    /* ── Field table ── */
+    .field-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 0.5rem; }
+    .field-table th {
+      text-align: left; padding: 0.7rem 1rem;
+      background: var(--gray-100); border-bottom: 2px solid var(--gray-200);
+      color: var(--gray-700); font-weight: 700; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .field-table td {
+      padding: 0.8rem 1rem; border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-600); vertical-align: top;
+    }
+    .field-table tr:last-child td { border-bottom: none; }
+    .field-table code {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      background: var(--gray-100); padding: 2px 5px; border-radius: 3px; color: var(--navy);
+    }
+    .tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
+    }
+    .tag-req { background: #fef3c7; color: #92400e; }
+    .tag-opt { background: var(--gray-100); color: var(--gray-600); }
+
+    /* ── Implementations ── */
+    .impl-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+    .impl-card {
+      border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.6rem;
+      text-decoration: none; color: inherit; display: block;
+      transition: all 0.15s;
+    }
+    .impl-card:hover { border-color: var(--indigo); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .impl-icon { font-size: 2rem; margin-bottom: 0.9rem; display: block; }
+    .impl-card h3 { font-size: 0.975rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
+    .impl-card p { font-size: 0.85rem; color: var(--gray-600); }
+
+    /* ── Deploy banner ── */
+    .deploy-section {
+      background: var(--navy); border-radius: 16px;
+      padding: 3rem; text-align: center; color: #fff;
+    }
+    .deploy-section h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .deploy-section p { color: #94a3b8; margin-bottom: 1.75rem; max-width: 540px; margin-left: auto; margin-right: auto; font-size: 0.95rem; }
+    .deploy-section p { margin-bottom: 1.75rem; }
+    .deploy-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .curl-block {
+      text-align: left; background: rgba(255,255,255,0.06); border-radius: 8px;
+      padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.78rem;
+      color: #e2e8f0; max-width: 620px; margin: 0 auto; overflow-x: auto;
+      line-height: 1.7; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .curl-block .comment { color: #94a3b8; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.45);
+      padding: 2.5rem 2rem; text-align: center; font-size: 0.85rem;
+    }
+    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2rem auto; max-width: 960px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      .compare-grid, .steps, .impl-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hero h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="#">
+    Agentic-HTTP <span class="chip">Draft</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#vs-openapi">vs OpenAPI</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#example">Example</a></li>
+    <li><a href="#implementations">Implementations</a></li>
+  </ul>
+  <a class="nav-gh" href="https://github.com/Shane-IL/agentic-http" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+    GitHub
+  </a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-pill">v1.0 · Open Draft</div>
+  <h1>Agent-native metadata<br><em>for REST APIs</em></h1>
+  <p>Agentic-HTTP lets your existing API tell AI agents what it <em>does</em> — side effects, retry safety, reversibility, and what to call next. Inline. No new infrastructure. Zero impact on non-agent clients.</p>
+  <div class="hero-ctas">
+    <a class="btn btn-primary" href="https://github.com/Shane-IL/agentic-http/blob/master/spec/README.md" target="_blank" rel="noopener">Read the spec</a>
+    <a class="btn btn-ghost" href="https://github.com/Shane-IL/agentic-http/blob/master/docs/agentic-http-whitepaper.md" target="_blank" rel="noopener">White paper</a>
+    <a class="btn btn-ghost" href="#how-it-works">How it works ↓</a>
+  </div>
+</section>
+
+<!-- vs OpenAPI -->
+<section class="section" id="vs-openapi">
+  <div class="section-inner">
+    <div class="section-label">Positioning</div>
+    <h2>Not a replacement for OpenAPI.</h2>
+    <p class="lead">OpenAPI describes structure — endpoints, parameters, schemas. Agentic-HTTP describes behavior — what happens when an agent calls your API.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card theirs">
+        <h3>OpenAPI tells agents:</h3>
+        <ul class="compare-list">
+          <li>What endpoints exist</li>
+          <li>What parameters they accept</li>
+          <li>What the response body looks like</li>
+          <li>Which HTTP methods are supported</li>
+        </ul>
+      </div>
+      <div class="compare-card ours">
+        <h3>Agentic-HTTP tells agents:</h3>
+        <ul class="compare-list check">
+          <li>Is it safe to auto-retry on failure?</li>
+          <li>What side effects does calling this trigger?</li>
+          <li>Can the action be reversed?</li>
+          <li>What should I call next in the workflow?</li>
+          <li>How do I recover from <em>this specific</em> error?</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="compare-note">
+      The two are complementary. OpenAPI is the structural contract, written once at design time.
+      Agentic-HTTP is the behavioral contract, delivered inline at call time — from the source that knows best.
+      The <code>openapi-to-agentic</code> tool generates Agentic-HTTP stubs directly from an existing OpenAPI spec.
+    </p>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section bg-gray" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label">Protocol</div>
+    <h2>One header. One extra field.</h2>
+    <p class="lead">No new transport. No wrapper service. No changes to existing clients.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Agent signals intent</h3>
+        <p>The agent adds <code>X-Agent-Client: true</code> and <code>X-Agent-Protocol: 1.0</code> to its request. Regular clients never send these — they're completely unaffected.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Server checks scope</h3>
+        <p>The endpoint verifies the caller has the <code>agentic:read</code> OAuth scope. Unauthenticated callers receive a standard response with no metadata.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Response includes agent-meta</h3>
+        <p>The endpoint appends an <code>agent-meta</code> object to its existing JSON response. The data payload is unchanged. No new routes, no new transport.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Example -->
+<section class="section" id="example">
+  <div class="section-inner">
+    <div class="section-label">Example</div>
+    <h2>POST /users — with agent metadata</h2>
+    <p class="lead">The response is identical for non-agent callers. Agent callers receive the full behavioral context inline.</p>
+
+    <div class="code-window">
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchTab(event,'request')">Request</div>
+        <div class="code-tab" onclick="switchTab(event,'response')">Response</div>
+      </div>
+      <div class="code-pane active" id="pane-request">
+        <pre><code class="language-http">POST /users HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
+X-Agent-Client: true
+X-Agent-Protocol: 1.0
+Content-Type: application/json
+
+{ "email": "alice@example.com", "name": "Alice" }</code></pre>
+      </div>
+      <div class="code-pane" id="pane-response">
+        <pre><code class="language-json">{
+  "data": {
+    "id": "usr_1a2b3c",
+    "email": "alice@example.com",
+    "status": "pending-verification"
+  },
+  "agent-meta": {
+    "version": "1.0",
+    "intent": "Creates a new user account. Triggers a verification email to the address provided.",
+    "effect": "write",
+    "reversible": false,
+    "idempotent": false,
+    "retry-safe": false,
+    "side-effects": ["sends-email", "creates-db-record"],
+    "preconditions": ["email must not already exist in the system"],
+    "typical-next": ["/users/usr_1a2b3c/verify"],
+    "error-guidance": {
+      "409": "User already exists. Do not retry. Use GET /users?email= to retrieve the existing record.",
+      "422": "Validation failed. Inspect errors[] for field-level details before retrying."
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Fields -->
+<section class="section bg-gray" id="fields">
+  <div class="section-inner">
+    <div class="section-label">Spec</div>
+    <h2>agent-meta field reference</h2>
+    <p class="lead">Required fields ensure every agent-meta envelope carries the minimum context for safe autonomous operation.</p>
+
+    <table class="field-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Type</th>
+          <th></th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>version</code></td>
+          <td>string</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>Schema version. Currently <code>"1.0"</code>.</td>
+        </tr>
+        <tr>
+          <td><code>intent</code></td>
+          <td>string</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>Plain-language description of what this endpoint does, written for an agent reasoning about whether to call it.</td>
+        </tr>
+        <tr>
+          <td><code>effect</code></td>
+          <td>enum</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>One of <code>read</code>, <code>write</code>, <code>delete</code>, <code>mixed</code>.</td>
+        </tr>
+        <tr>
+          <td><code>reversible</code></td>
+          <td>boolean</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>Whether the effects of this call can be undone via another API call.</td>
+        </tr>
+        <tr>
+          <td><code>idempotent</code></td>
+          <td>boolean</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>Whether calling this endpoint multiple times with the same input produces the same result.</td>
+        </tr>
+        <tr>
+          <td><code>retry-safe</code></td>
+          <td>boolean</td>
+          <td><span class="tag tag-req">Required</span></td>
+          <td>Whether an agent may automatically retry on transient failure.</td>
+        </tr>
+        <tr>
+          <td><code>side-effects</code></td>
+          <td>string[]</td>
+          <td><span class="tag tag-opt">Optional</span></td>
+          <td>Machine-readable labels for observable side effects. Lowercase hyphenated, e.g. <code>sends-email</code>.</td>
+        </tr>
+        <tr>
+          <td><code>preconditions</code></td>
+          <td>string[]</td>
+          <td><span class="tag tag-opt">Optional</span></td>
+          <td>Natural-language conditions that should be true before calling this endpoint.</td>
+        </tr>
+        <tr>
+          <td><code>typical-next</code></td>
+          <td>string[]</td>
+          <td><span class="tag tag-opt">Optional</span></td>
+          <td>Ordered list of endpoint paths typically called after this one. Enables workflow chaining without external docs.</td>
+        </tr>
+        <tr>
+          <td><code>error-guidance</code></td>
+          <td>object</td>
+          <td><span class="tag tag-opt">Optional</span></td>
+          <td>Map of HTTP status code strings to agent-readable recovery instructions for this specific endpoint.</td>
+        </tr>
+        <tr>
+          <td><code>extensions</code></td>
+          <td>object</td>
+          <td><span class="tag tag-opt">Optional</span></td>
+          <td>Namespaced extension fields. Keys must be prefixed <code>x-{namespace}-</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Implementations -->
+<section class="section" id="implementations">
+  <div class="section-inner">
+    <div class="section-label">Reference Implementations</div>
+    <h2>Drop it into your stack.</h2>
+    <p class="lead">Middleware and decorators for three frameworks. Same behavior, idiomatic to each runtime.</p>
+
+    <div class="impl-grid">
+      <a class="impl-card" href="https://github.com/Shane-IL/agentic-http/tree/master/implementations/express" target="_blank" rel="noopener">
+        <span class="impl-icon">🟨</span>
+        <h3>Express / Node.js</h3>
+        <p>Per-route middleware factory. Wraps <code>res.json</code> to append <code>agent-meta</code> inline.</p>
+      </a>
+      <a class="impl-card" href="https://github.com/Shane-IL/agentic-http/tree/master/implementations/fastapi" target="_blank" rel="noopener">
+        <span class="impl-icon">🐍</span>
+        <h3>FastAPI / Python</h3>
+        <p>Decorator + async middleware. Integrates with FastAPI dependency injection and response models.</p>
+      </a>
+      <a class="impl-card" href="https://github.com/Shane-IL/agentic-http/tree/master/implementations/nestjs" target="_blank" rel="noopener">
+        <span class="impl-icon">🔴</span>
+        <h3>NestJS / TypeScript</h3>
+        <p><code>@AgenticMeta()</code> decorator + interceptor. Module-level setup via <code>AgenticHttpModule.forRoot()</code>.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Live demo -->
+<section class="section bg-gray" id="demo">
+  <div class="section-inner">
+    <div class="section-label">Try It</div>
+    <h2>Live demo API</h2>
+    <p class="lead">A working user management API built on the Express reference implementation. Deploy your own copy to Vercel in one click — it auto-deploys from this repo.</p>
+
+    <div class="deploy-section">
+      <h3>Deploy the reference API</h3>
+      <p>The demo API lives in <code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">examples/live-api/</code>. Connect your fork to Vercel and it redeploys on every push.</p>
+      <div class="deploy-btns">
+        <a class="btn btn-primary"
+           href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FShane-IL%2Fagentic-http&root-directory=examples%2Flive-api&project-name=agentic-http-demo&demo-title=Agentic-HTTP+Demo+API"
+           target="_blank" rel="noopener">
+          ▲ Deploy to Vercel
+        </a>
+        <a class="btn btn-ghost"
+           href="https://github.com/Shane-IL/agentic-http/tree/master/examples/live-api"
+           target="_blank" rel="noopener">
+          View source
+        </a>
+      </div>
+
+      <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.75rem;">Once deployed, try it with curl:</p>
+      <div class="curl-block"><span class="comment"># Standard call — no agent-meta returned</span>
+curl https://your-deployment.vercel.app/users
+
+<span class="comment"># Agent call — agent-meta appended to response</span>
+curl https://your-deployment.vercel.app/users \
+  -H "X-Agent-Client: true" \
+  -H "X-Agent-Protocol: 1.0"
+
+<span class="comment"># Discovery endpoint</span>
+curl https://your-deployment.vercel.app/.well-known/agentic-http.json</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<hr class="footer-divider">
+<footer>
+  <div class="footer-links">
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/spec/README.md" target="_blank" rel="noopener">Spec</a>
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/docs/agentic-http-whitepaper.md" target="_blank" rel="noopener">White paper</a>
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/CLA.md" target="_blank" rel="noopener">CLA</a>
+    <a href="https://github.com/Shane-IL/agentic-http/issues" target="_blank" rel="noopener">Feedback &amp; Discussion</a>
+    <a href="https://github.com/Shane-IL/agentic-http" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <p>Agentic-HTTP is an open draft. Spec: <a href="https://github.com/Shane-IL/agentic-http/blob/master/LICENSE-spec" target="_blank" rel="noopener">CC BY 4.0</a> · Code: <a href="https://github.com/Shane-IL/agentic-http/blob/master/LICENSE-code" target="_blank" rel="noopener">MIT</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  function switchTab(e, name) {
+    const window = e.target.closest('.code-window');
+    window.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    window.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    window.querySelector('#pane-' + name).classList.add('active');
+  }
+</script>
+</body>
+</html>
