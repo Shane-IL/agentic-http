@@ -5,14 +5,15 @@ Thanks for your interest in contributing.
 ## What We're Looking For
 
 - **Spec feedback**: Ambiguities, gaps, or problems in the spec itself
-- **Reference implementations**: New languages/frameworks (Rails, Go, .NET, etc.)
+- **Reference implementations**: New languages/frameworks (Rails, Go, .NET, Hapi, etc.)
 - **Real-world testing**: Feedback from implementing against an actual API
 - **Edge cases**: Scenarios the current spec doesn't handle well (streaming, webhooks, etc.)
+- **Docs and guides**: Integration guides for agent frameworks, API provider how-tos
 
 ## How to Contribute
 
 1. **For spec changes**: Open an issue first and describe the problem. Large spec changes need discussion before a PR.
-2. **For implementations**: Follow the existing Express or FastAPI implementations as a reference. Each implementation must pass the validator test suite.
+2. **For implementations**: Follow the existing Express, FastAPI, or NestJS implementations as a reference. Use `examples/live-api/` as a sandbox to test your implementation against a real API. Each implementation must pass the validator test suite.
 3. **For documentation**: PRs welcome without prior issue.
 
 ## Spec Change Process
