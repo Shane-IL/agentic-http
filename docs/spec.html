@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specification — Agentic-HTTP</title>
+  <meta name="description" content="The Agentic-HTTP v1.0 specification. Agent-native metadata for REST APIs.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/catppuccin-mocha.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crust:    #11111b;
+      --mantle:   #181825;
+      --base:     #1e1e2e;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+      --overlay0: #6c7086;
+      --overlay1: #7f849c;
+      --subtext0: #a6adc8;
+      --subtext1: #bac2de;
+      --text:     #cdd6f4;
+      --lavender: #b4befe;
+      --blue:     #89b4fa;
+      --teal:     #94e2d5;
+      --green:    #a6e3a1;
+      --yellow:   #f9e2af;
+      --mauve:    #cba6f7;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    }
+
+    body { font-family: var(--font-sans); color: var(--text); background: var(--base); line-height: 1.6; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0;
+      background: rgba(24,24,37,0.92); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--surface0);
+      padding: 0 2rem; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-weight: 700; font-size: 0.95rem; color: var(--text);
+      text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .nav-logo .chip {
+      font-size: 0.65rem; background: var(--mauve); color: var(--crust);
+      padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: 0.02em;
+    }
+    .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a { color: var(--subtext0); text-decoration: none; font-size: 0.875rem; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-gh {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: var(--surface0); color: var(--text);
+      padding: 0.4rem 1rem; border-radius: 6px;
+      font-size: 0.8rem; font-weight: 600; text-decoration: none;
+      border: 1px solid var(--surface1);
+    }
+    .nav-gh:hover { background: var(--surface1); }
+
+    /* ── Layout ── */
+    .page { display: flex; max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; gap: 3rem; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      position: sticky; top: 80px; align-self: flex-start;
+      max-height: calc(100vh - 100px); overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--overlay1); font-weight: 700; margin-bottom: 0.75rem;
+    }
+    .sidebar nav ul { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
+    .sidebar nav ul li a {
+      display: block; padding: 0.3rem 0.6rem; border-radius: 5px;
+      font-size: 0.825rem; color: var(--subtext0); text-decoration: none;
+      border-left: 2px solid transparent; transition: all 0.12s;
+    }
+    .sidebar nav ul li a:hover { color: var(--text); background: var(--surface0); }
+    .sidebar nav ul li a.active { color: var(--mauve); border-left-color: var(--mauve); background: rgba(203,166,247,0.08); }
+
+    /* ── Content ── */
+    .content { flex: 1; min-width: 0; }
+
+    .page-header { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--surface0); }
+    .page-header .label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--mauve); font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .page-header h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.75rem; }
+    .page-header .meta { font-size: 0.85rem; color: var(--subtext0); display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .page-header .meta span { display: flex; align-items: center; gap: 0.35rem; }
+
+    .section { margin-bottom: 3.5rem; }
+    .section h2 {
+      font-size: 1.4rem; font-weight: 700; color: var(--text);
+      margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--surface0); letter-spacing: -0.015em;
+    }
+    .section h3 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 1.5rem 0 0.75rem; }
+    .section p { color: var(--subtext0); margin-bottom: 1rem; line-height: 1.75; }
+    .section p:last-child { margin-bottom: 0; }
+    .section ul, .section ol { margin: 0.75rem 0 1rem 1.5rem; }
+    .section li { color: var(--subtext0); margin-bottom: 0.3rem; line-height: 1.7; }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th {
+      text-align: left; padding: 0.65rem 1rem;
+      background: var(--surface0); border-bottom: 2px solid var(--surface1);
+      color: var(--subtext1); font-weight: 700; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+    }
+    td {
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--surface0);
+      color: var(--subtext0); vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    td code, th code {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      background: var(--surface0); padding: 2px 5px; border-radius: 3px; color: var(--blue);
+    }
+    .tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
+    }
+    .tag-req { background: rgba(249,226,175,0.15); color: var(--yellow); }
+    .tag-opt { background: var(--surface0); color: var(--subtext0); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: var(--crust); border-radius: 10px; overflow: hidden;
+      margin: 1.25rem 0; border: 1px solid var(--surface0);
+    }
+    .code-block-label {
+      background: var(--mantle); padding: 0.5rem 1rem;
+      font-size: 0.72rem; color: var(--overlay1); font-family: var(--font-mono);
+      border-bottom: 1px solid var(--surface0);
+    }
+    .code-block pre { margin: 0; padding: 1.25rem 1.5rem; font-size: 0.8rem !important; line-height: 1.7 !important; overflow-x: auto; }
+    .code-block pre code { background: transparent !important; padding: 0 !important; font-size: inherit !important; }
+    .hljs { background: transparent !important; }
+
+    /* Inline code */
+    .section p code, .section li code, .conformance li code {
+      font-family: var(--font-mono); font-size: 0.82em;
+      background: var(--surface0); padding: 2px 5px; border-radius: 3px; color: var(--blue);
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-left: 3px solid var(--mauve); background: rgba(203,166,247,0.07);
+      border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0;
+      font-size: 0.9rem; color: var(--subtext0); line-height: 1.7;
+    }
+    .callout.green { border-left-color: var(--green); background: rgba(166,227,161,0.07); }
+    .callout.yellow { border-left-color: var(--yellow); background: rgba(249,226,175,0.07); }
+
+    /* ── Conformance list ── */
+    .conformance { list-style: none; margin: 0.75rem 0; display: flex; flex-direction: column; gap: 0.45rem; }
+    .conformance li { color: var(--subtext0); padding-left: 1.5rem; position: relative; font-size: 0.9rem; }
+    .conformance li::before { position: absolute; left: 0; font-weight: 700; }
+    .must li::before { content: 'MUST'; color: var(--mauve); font-size: 0.65rem; top: 0.25rem; }
+    .should li::before { content: 'SHOULD'; color: var(--blue); font-size: 0.65rem; top: 0.25rem; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--crust); color: var(--overlay1);
+      padding: 2.5rem 2rem; text-align: center; font-size: 0.85rem;
+      border-top: 1px solid var(--surface0);
+    }
+    footer a { color: var(--subtext0); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    Agentic-HTTP <span class="chip">Draft</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#vs-openapi">vs OpenAPI</a></li>
+    <li><a href="index.html#how-it-works">How it works</a></li>
+    <li><a href="spec.html" style="color:var(--mauve)">Spec</a></li>
+    <li><a href="whitepaper.html">White paper</a></li>
+  </ul>
+  <a class="nav-gh" href="https://github.com/Shane-IL/agentic-http" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+    GitHub
+  </a>
+</nav>
+
+<div class="page">
+  <aside class="sidebar">
+    <div class="sidebar-label">Contents</div>
+    <nav>
+      <ul>
+        <li><a href="#overview">1. Overview</a></li>
+        <li><a href="#request-headers">2. Request Headers</a></li>
+        <li><a href="#response-envelope">3. Response Envelope</a></li>
+        <li><a href="#auth">4. Auth &amp; Authorization</a></li>
+        <li><a href="#discovery">5. Discovery</a></li>
+        <li><a href="#versioning">6. Versioning</a></li>
+        <li><a href="#conformance">7. Conformance</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="page-header">
+      <div class="label">Open Draft</div>
+      <h1>Agentic-HTTP Specification</h1>
+      <div class="meta">
+        <span>Version 1.0-draft</span>
+        <span>Status: Draft for Discussion</span>
+        <span>2026</span>
+      </div>
+    </div>
+
+    <!-- 1. Overview -->
+    <section class="section" id="overview">
+      <h2>1. Overview</h2>
+      <p>Agentic-HTTP is a convention for agent-native metadata in HTTP APIs. It is backward-compatible, additive, and requires no new transport or infrastructure.</p>
+      <p>A compliant endpoint:</p>
+      <ol>
+        <li>Detects the <code>X-Agent-Client</code> request header</li>
+        <li>Verifies the caller has the <code>agentic:read</code> OAuth scope</li>
+        <li>Appends an <code>agent-meta</code> object to its JSON response</li>
+      </ol>
+      <div class="callout">
+        Non-agent clients send no agent headers and receive no metadata. Existing integrations are completely unaffected.
+      </div>
+    </section>
+
+    <!-- 2. Request Headers -->
+    <section class="section" id="request-headers">
+      <h2>2. Request Headers</h2>
+      <p>Agents signal their identity using two required headers and one optional header:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Header</th><th>Required</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>X-Agent-Client</code></td><td><span class="tag tag-req">Yes</span></td><td><code>"true"</code></td></tr>
+            <tr><td><code>X-Agent-Protocol</code></td><td><span class="tag tag-req">Yes</span></td><td><code>"1.0"</code></td></tr>
+            <tr><td><code>X-Agent-Framework</code></td><td><span class="tag tag-opt">No</span></td><td>e.g. <code>"claude-code/1.0"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Non-compliant endpoints silently ignore these headers. Existing clients are unaffected.</p>
+    </section>
+
+    <!-- 3. Response Envelope -->
+    <section class="section" id="response-envelope">
+      <h2>3. Response Envelope</h2>
+      <p>When the agent signal is detected and the caller is authorized, the endpoint appends <code>agent-meta</code> to its JSON response body. The original data payload is unchanged.</p>
+
+      <div class="code-block">
+        <div class="code-block-label">application/json</div>
+        <pre><code class="language-json">{
+  "data": { },
+  "agent-meta": {
+    "version": "1.0",
+    "intent": "string (required)",
+    "effect": "read | write | delete | mixed",
+    "reversible": true,
+    "idempotent": true,
+    "retry-safe": true,
+    "side-effects": ["string"],
+    "preconditions": ["string"],
+    "typical-next": ["/path/to/next"],
+    "error-guidance": {
+      "4xx": "string"
+    },
+    "extensions": {
+      "x-namespace-field": "value"
+    }
+  }
+}</code></pre>
+      </div>
+
+      <h3>3.1 Field Reference</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Type</th><th></th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>version</code></td><td>string</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>Schema version. Currently <code>"1.0"</code>.</td>
+            </tr>
+            <tr>
+              <td><code>intent</code></td><td>string</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>Plain-language description of what this endpoint does, written for an agent reasoning about whether to call it.</td>
+            </tr>
+            <tr>
+              <td><code>effect</code></td><td>enum</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>One of <code>read</code>, <code>write</code>, <code>delete</code>, <code>mixed</code>.</td>
+            </tr>
+            <tr>
+              <td><code>reversible</code></td><td>boolean</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>Whether the effects of this call can be undone via another API call.</td>
+            </tr>
+            <tr>
+              <td><code>idempotent</code></td><td>boolean</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>Whether calling this endpoint multiple times with the same input produces the same result.</td>
+            </tr>
+            <tr>
+              <td><code>retry-safe</code></td><td>boolean</td>
+              <td><span class="tag tag-req">Required</span></td>
+              <td>Whether it is safe for the agent to automatically retry on transient failure.</td>
+            </tr>
+            <tr>
+              <td><code>side-effects</code></td><td>string[]</td>
+              <td><span class="tag tag-opt">Optional</span></td>
+              <td>Machine-readable list of observable side effects. Lowercase hyphenated labels, e.g. <code>sends-email</code>.</td>
+            </tr>
+            <tr>
+              <td><code>preconditions</code></td><td>string[]</td>
+              <td><span class="tag tag-opt">Optional</span></td>
+              <td>Natural-language conditions that should be true before calling this endpoint.</td>
+            </tr>
+            <tr>
+              <td><code>typical-next</code></td><td>string[]</td>
+              <td><span class="tag tag-opt">Optional</span></td>
+              <td>Ordered list of endpoint paths typically called after this one. Enables workflow chaining without external docs.</td>
+            </tr>
+            <tr>
+              <td><code>error-guidance</code></td><td>object</td>
+              <td><span class="tag tag-opt">Optional</span></td>
+              <td>Map of HTTP status code strings to agent-readable recovery instructions for this specific endpoint.</td>
+            </tr>
+            <tr>
+              <td><code>extensions</code></td><td>object</td>
+              <td><span class="tag tag-opt">Optional</span></td>
+              <td>Namespaced extension fields. Keys must be prefixed <code>x-{namespace}-</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 Header Fallback</h3>
+      <p>For APIs where response body modification is architecturally undesirable, metadata may be served via a reference header:</p>
+      <div class="code-block">
+        <div class="code-block-label">HTTP Response Header</div>
+        <pre><code class="language-http">X-Agent-Meta-Ref: https://api.example.com/.well-known/agentic-http/endpoints/POST-users</code></pre>
+      </div>
+      <p>Body-based delivery is preferred.</p>
+    </section>
+
+    <!-- 4. Auth -->
+    <section class="section" id="auth">
+      <h2>4. Authentication and Authorization</h2>
+      <div class="callout yellow">
+        <code>X-Agent-Client</code> is a <strong>request signal</strong>, not a trust signal. Any client can send it. Metadata must be gated behind authentication — not behind the presence of the header alone.
+      </div>
+      <ul>
+        <li>Metadata must be gated behind the <code>agentic:read</code> OAuth scope.</li>
+        <li>Unauthenticated callers receive no <code>agent-meta</code>, even if they send the correct headers.</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-block-label">Scope resolution</div>
+        <pre><code class="language-plaintext">Scope: agentic:read  →  full agent-meta envelope
+No scope             →  standard response, no agent-meta</code></pre>
+      </div>
+    </section>
+
+    <!-- 5. Discovery -->
+    <section class="section" id="discovery">
+      <h2>5. Discovery</h2>
+
+      <h3>5.1 Well-Known Endpoint (preferred)</h3>
+      <div class="code-block">
+        <div class="code-block-label">Request</div>
+        <pre><code class="language-http">GET /.well-known/agentic-http.json</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-block-label">Response</div>
+        <pre><code class="language-json">{
+  "agentic-http-version": "1.0",
+  "description": "Human-readable API description",
+  "endpoints": {
+    "/api/v1/users": { "methods": ["GET", "POST", "DELETE"] }
+  }
+}</code></pre>
+      </div>
+
+      <h3>5.2 OPTIONS Probe</h3>
+      <div class="code-block">
+        <div class="code-block-label">HTTP</div>
+        <pre><code class="language-http">OPTIONS /api/v1/users HTTP/1.1
+
+HTTP/1.1 200 OK
+Agentic-HTTP: 1.0</code></pre>
+      </div>
+
+      <h3>5.3 Speculative Headers (graceful degradation)</h3>
+      <p>Agents may send <code>X-Agent-Client: true</code> on every request. The absence of <code>agent-meta</code> in the response indicates the endpoint is non-compliant. Agents fall back to standard behavior silently.</p>
+    </section>
+
+    <!-- 6. Versioning -->
+    <section class="section" id="versioning">
+      <h2>6. Versioning</h2>
+      <ul>
+        <li>The <code>X-Agent-Protocol</code> request header specifies the schema version the caller understands.</li>
+        <li>Servers respond with the highest version they support that is ≤ the requested version.</li>
+        <li>Breaking changes increment the major version. Additive changes are non-breaking.</li>
+      </ul>
+    </section>
+
+    <!-- 7. Conformance -->
+    <section class="section" id="conformance">
+      <h2>7. Conformance</h2>
+      <p>A compliant implementation MUST:</p>
+      <ul class="conformance must">
+        <li>Detect <code>X-Agent-Client: true</code> and <code>X-Agent-Protocol</code></li>
+        <li>Gate <code>agent-meta</code> behind the <code>agentic:read</code> scope</li>
+        <li>Return all required fields (<code>version</code>, <code>intent</code>, <code>effect</code>, <code>reversible</code>, <code>idempotent</code>, <code>retry-safe</code>)</li>
+        <li>Not modify responses for callers that do not send <code>X-Agent-Client: true</code></li>
+      </ul>
+      <br>
+      <p>A compliant implementation SHOULD:</p>
+      <ul class="conformance should">
+        <li>Publish <code>/.well-known/agentic-http.json</code></li>
+        <li>Populate <code>side-effects</code>, <code>preconditions</code>, <code>typical-next</code>, and <code>error-guidance</code></li>
+        <li>Validate <code>agent-meta</code> output against the JSON Schema (see <code>spec/schema.json</code> in the repo)</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="spec.html">Spec</a>
+    <a href="whitepaper.html">White paper</a>
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+    <a href="https://github.com/Shane-IL/agentic-http/blob/master/CLA.md" target="_blank" rel="noopener">CLA</a>
+    <a href="https://github.com/Shane-IL/agentic-http" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <p>Spec: <a href="https://github.com/Shane-IL/agentic-http/blob/master/LICENSE-spec" target="_blank" rel="noopener">CC BY 4.0</a> · Code: <a href="https://github.com/Shane-IL/agentic-http/blob/master/LICENSE-code" target="_blank" rel="noopener">MIT</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  // Sidebar active link on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
