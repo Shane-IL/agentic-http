@@ -34,7 +34,7 @@
     body { font-family: var(--font-sans); color: var(--text); background: var(--base); line-height: 1.6; }
 
     /* ── Nav ── */
-    nav {
+    .top-nav {
       position: sticky; top: 0;
       background: rgba(24,24,37,0.92); backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--surface0);
@@ -75,14 +75,14 @@
       font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
       color: var(--overlay1); font-weight: 700; margin-bottom: 0.75rem;
     }
-    .sidebar nav ul { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
-    .sidebar nav ul li a {
+    .sidebar-nav ul { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
+    .sidebar-nav ul li a {
       display: block; padding: 0.3rem 0.6rem; border-radius: 5px;
       font-size: 0.825rem; color: var(--subtext0); text-decoration: none;
       border-left: 2px solid transparent; transition: all 0.12s;
     }
-    .sidebar nav ul li a:hover { color: var(--text); background: var(--surface0); }
-    .sidebar nav ul li a.active { color: var(--mauve); border-left-color: var(--mauve); background: rgba(203,166,247,0.08); }
+    .sidebar-nav ul li a:hover { color: var(--text); background: var(--surface0); }
+    .sidebar-nav ul li a.active { color: var(--mauve); border-left-color: var(--mauve); background: rgba(203,166,247,0.08); }
 
     /* ── Content ── */
     .content { flex: 1; min-width: 0; }
@@ -187,7 +187,7 @@
 </head>
 <body>
 
-<nav>
+<nav class="top-nav">
   <a class="nav-logo" href="index.html">
     Agentic-HTTP <span class="chip">Draft</span>
   </a>
@@ -206,7 +206,7 @@
 <div class="page">
   <aside class="sidebar">
     <div class="sidebar-label">Contents</div>
-    <nav>
+    <div class="sidebar-nav">
       <ul>
         <li><a href="#overview">1. Overview</a></li>
         <li><a href="#request-headers">2. Request Headers</a></li>
@@ -216,7 +216,7 @@
         <li><a href="#versioning">6. Versioning</a></li>
         <li><a href="#conformance">7. Conformance</a></li>
       </ul>
-    </nav>
+    </div>
   </aside>
 
   <main class="content">
@@ -468,7 +468,7 @@ Agentic-HTTP: 1.0</code></pre>
 
   // Sidebar active link on scroll
   const sections = document.querySelectorAll('.section[id]');
-  const links = document.querySelectorAll('.sidebar nav a');
+  const links = document.querySelectorAll('.sidebar-nav a');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
