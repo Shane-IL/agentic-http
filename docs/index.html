@@ -5,37 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agentic-HTTP — Agent-native metadata for REST APIs</title>
   <meta name="description" content="A minimal HTTP convention for surfacing semantic metadata to AI agent callers — inline, backward-compatible, no new infrastructure.">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/catppuccin-mocha.min.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy:   #0f172a;
-      --indigo: #6366f1;
-      --indigo-light: #818cf8;
-      --gray-50:  #f8fafc;
-      --gray-100: #f1f5f9;
-      --gray-200: #e2e8f0;
-      --gray-400: #94a3b8;
-      --gray-600: #475569;
-      --gray-700: #334155;
+      /* Catppuccin Mocha */
+      --crust:    #11111b;
+      --mantle:   #181825;
+      --base:     #1e1e2e;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+      --overlay0: #6c7086;
+      --overlay1: #7f849c;
+      --subtext0: #a6adc8;
+      --subtext1: #bac2de;
+      --text:     #cdd6f4;
+      --lavender: #b4befe;
+      --blue:     #89b4fa;
+      --teal:     #94e2d5;
+      --green:    #a6e3a1;
+      --yellow:   #f9e2af;
+      --peach:    #fab387;
+      --red:      #f38ba8;
+      --mauve:    #cba6f7;
+      --pink:     #f5c2e7;
+
       --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-mono: 'Fira Code', 'Cascadia Code', Consolas, monospace;
     }
 
     body {
       font-family: var(--font-sans);
-      color: var(--gray-700);
+      color: var(--text);
       line-height: 1.6;
-      background: #fff;
+      background: var(--base);
     }
 
     /* ── Nav ── */
     nav {
       position: sticky; top: 0;
-      background: rgba(255,255,255,0.96);
+      background: rgba(24,24,37,0.92);
       backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--surface0);
       padding: 0 2rem;
       height: 58px;
       display: flex; align-items: center; justify-content: space-between;
@@ -43,44 +56,45 @@
     }
     .nav-logo {
       font-weight: 700; font-size: 0.95rem;
-      color: var(--navy); text-decoration: none;
+      color: var(--text); text-decoration: none;
       display: flex; align-items: center; gap: 0.5rem;
     }
     .nav-logo .chip {
-      font-size: 0.65rem; background: var(--indigo); color: #fff;
+      font-size: 0.65rem; background: var(--mauve); color: var(--crust);
       padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: 0.02em;
     }
     .nav-links { display: flex; gap: 1.75rem; list-style: none; }
-    .nav-links a { color: var(--gray-600); text-decoration: none; font-size: 0.875rem; }
-    .nav-links a:hover { color: var(--navy); }
+    .nav-links a { color: var(--subtext0); text-decoration: none; font-size: 0.875rem; }
+    .nav-links a:hover { color: var(--text); }
     .nav-gh {
       display: flex; align-items: center; gap: 0.4rem;
-      background: var(--navy); color: #fff;
+      background: var(--surface0); color: var(--text);
       padding: 0.4rem 1rem; border-radius: 6px;
       font-size: 0.8rem; font-weight: 600; text-decoration: none;
+      border: 1px solid var(--surface1);
     }
-    .nav-gh:hover { background: #1e293b; }
+    .nav-gh:hover { background: var(--surface1); }
 
     /* ── Hero ── */
     .hero {
-      background: var(--navy); color: #fff;
+      background: var(--crust); color: var(--text);
       padding: 6rem 2rem 5.5rem;
       text-align: center;
     }
     .hero-pill {
       display: inline-block;
-      background: rgba(99,102,241,0.18); color: var(--indigo-light);
+      background: rgba(203,166,247,0.12); color: var(--mauve);
       font-size: 0.75rem; padding: 4px 14px; border-radius: 20px;
-      border: 1px solid rgba(99,102,241,0.35);
+      border: 1px solid rgba(203,166,247,0.3);
       margin-bottom: 1.5rem; letter-spacing: 0.06em; text-transform: uppercase;
     }
     .hero h1 {
       font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
       line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.025em;
     }
-    .hero h1 em { color: var(--indigo-light); font-style: normal; }
+    .hero h1 em { color: var(--mauve); font-style: normal; }
     .hero p {
-      font-size: 1.1rem; color: #94a3b8;
+      font-size: 1.1rem; color: var(--subtext0);
       max-width: 580px; margin: 0 auto 2.5rem; line-height: 1.75;
     }
     .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
@@ -90,29 +104,29 @@
       font-size: 0.875rem; font-weight: 600; text-decoration: none;
       transition: all 0.15s;
     }
-    .btn-primary { background: var(--indigo); color: #fff; }
-    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary { background: var(--mauve); color: var(--crust); }
+    .btn-primary:hover { background: var(--lavender); }
     .btn-ghost {
-      border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8);
+      border: 1px solid var(--surface1); color: var(--subtext1);
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .btn-ghost:hover { background: var(--surface0); color: var(--text); }
 
     /* ── Sections ── */
     .section { padding: 5rem 2rem; }
     .section-inner { max-width: 960px; margin: 0 auto; }
     .section-label {
       font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
-      color: var(--indigo); font-weight: 700; margin-bottom: 0.6rem;
+      color: var(--mauve); font-weight: 700; margin-bottom: 0.6rem;
     }
     .section h2 {
       font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 700;
-      color: var(--navy); margin-bottom: 0.9rem; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 0.9rem; letter-spacing: -0.02em;
     }
     .section .lead {
-      font-size: 1rem; color: var(--gray-600); max-width: 640px;
+      font-size: 1rem; color: var(--subtext0); max-width: 640px;
       line-height: 1.75; margin-bottom: 2.5rem;
     }
-    .bg-gray { background: var(--gray-50); }
+    .bg-gray { background: var(--mantle); }
 
     /* ── OpenAPI comparison ── */
     .compare-grid {
@@ -120,132 +134,131 @@
       margin-bottom: 1.25rem;
     }
     .compare-card {
-      border: 1px solid var(--gray-200); border-radius: 12px;
+      border: 1px solid var(--surface1); border-radius: 12px;
       padding: 1.6rem;
     }
-    .compare-card.theirs { background: #fff; }
-    .compare-card.ours { border-color: var(--indigo); background: #fafaff; }
+    .compare-card.theirs { background: var(--surface0); }
+    .compare-card.ours { border-color: var(--mauve); background: rgba(203,166,247,0.05); }
     .compare-card h3 {
       font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--gray-400);
+      letter-spacing: 0.06em; margin-bottom: 1rem; color: var(--overlay1);
     }
-    .compare-card.ours h3 { color: var(--indigo); }
+    .compare-card.ours h3 { color: var(--mauve); }
     .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
     .compare-list li {
-      font-size: 0.9rem; color: var(--gray-600);
+      font-size: 0.9rem; color: var(--subtext0);
       padding-left: 1.4rem; position: relative;
     }
-    .compare-list li::before { content: '–'; position: absolute; left: 0; color: var(--gray-400); }
-    .compare-list.check li::before { content: '✓'; color: var(--indigo); font-weight: 700; }
+    .compare-list li::before { content: '–'; position: absolute; left: 0; color: var(--overlay1); }
+    .compare-list.check li::before { content: '✓'; color: var(--green); font-weight: 700; }
     .compare-note {
-      font-size: 0.85rem; color: var(--gray-600); line-height: 1.6;
+      font-size: 0.85rem; color: var(--subtext0); line-height: 1.6;
     }
     .compare-note code {
       font-family: var(--font-mono); font-size: 0.8rem;
-      background: var(--gray-100); padding: 2px 5px; border-radius: 3px;
-      color: var(--navy);
+      background: var(--surface0); padding: 2px 5px; border-radius: 3px;
+      color: var(--blue);
     }
 
     /* ── How it works ── */
     .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
     .step { text-align: center; }
     .step-num {
-      width: 42px; height: 42px; background: var(--navy); color: #fff;
+      width: 42px; height: 42px; background: var(--mauve); color: var(--crust);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 0.95rem; margin: 0 auto 1rem;
     }
-    .step h3 { font-size: 0.975rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
-    .step p { font-size: 0.875rem; color: var(--gray-600); line-height: 1.65; }
+    .step h3 { font-size: 0.975rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+    .step p { font-size: 0.875rem; color: var(--subtext0); line-height: 1.65; }
     .step p code {
       font-family: var(--font-mono); font-size: 0.78rem;
-      background: var(--gray-200); padding: 1px 5px; border-radius: 3px; color: var(--navy);
+      background: var(--surface0); padding: 1px 5px; border-radius: 3px; color: var(--blue);
     }
 
     /* ── Code window ── */
     .code-window {
-      background: #0d1117; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.18); margin-top: 0.5rem;
+      background: var(--crust); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4); margin-top: 0.5rem;
     }
     .code-tabs {
-      display: flex; border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding: 0 1rem; background: #161b22;
+      display: flex; border-bottom: 1px solid var(--surface0);
+      padding: 0 1rem; background: var(--mantle);
     }
     .code-tab {
       padding: 0.7rem 1rem; font-size: 0.8rem;
-      color: rgba(255,255,255,0.4); cursor: pointer;
+      color: var(--overlay1); cursor: pointer;
       border-bottom: 2px solid transparent; transition: all 0.15s;
       user-select: none;
     }
-    .code-tab.active { color: #fff; border-bottom-color: var(--indigo); }
+    .code-tab.active { color: var(--text); border-bottom-color: var(--mauve); }
     .code-pane { display: none; padding: 1.5rem 1.75rem; }
     .code-pane.active { display: block; }
     .code-pane pre { margin: 0; font-size: 0.8rem !important; line-height: 1.7 !important; }
     .code-pane pre code { background: transparent !important; padding: 0 !important; font-size: inherit !important; }
-    /* override hljs background */
     .hljs { background: transparent !important; }
 
     /* ── Field table ── */
     .field-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 0.5rem; }
     .field-table th {
       text-align: left; padding: 0.7rem 1rem;
-      background: var(--gray-100); border-bottom: 2px solid var(--gray-200);
-      color: var(--gray-700); font-weight: 700; font-size: 0.75rem;
+      background: var(--surface0); border-bottom: 2px solid var(--surface1);
+      color: var(--subtext1); font-weight: 700; font-size: 0.75rem;
       text-transform: uppercase; letter-spacing: 0.06em;
     }
     .field-table td {
-      padding: 0.8rem 1rem; border-bottom: 1px solid var(--gray-100);
-      color: var(--gray-600); vertical-align: top;
+      padding: 0.8rem 1rem; border-bottom: 1px solid var(--surface0);
+      color: var(--subtext0); vertical-align: top;
     }
     .field-table tr:last-child td { border-bottom: none; }
     .field-table code {
       font-family: var(--font-mono); font-size: 0.78rem;
-      background: var(--gray-100); padding: 2px 5px; border-radius: 3px; color: var(--navy);
+      background: var(--surface0); padding: 2px 5px; border-radius: 3px; color: var(--blue);
     }
     .tag {
       display: inline-block; font-size: 0.68rem; font-weight: 700;
       padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
     }
-    .tag-req { background: #fef3c7; color: #92400e; }
-    .tag-opt { background: var(--gray-100); color: var(--gray-600); }
+    .tag-req { background: rgba(249,226,175,0.15); color: var(--yellow); }
+    .tag-opt { background: var(--surface0); color: var(--subtext0); }
 
     /* ── Implementations ── */
     .impl-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
     .impl-card {
-      border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.6rem;
+      border: 1px solid var(--surface1); border-radius: 12px; padding: 1.6rem;
       text-decoration: none; color: inherit; display: block;
-      transition: all 0.15s;
+      background: var(--surface0); transition: all 0.15s;
     }
-    .impl-card:hover { border-color: var(--indigo); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .impl-card:hover { border-color: var(--mauve); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
     .impl-icon { font-size: 2rem; margin-bottom: 0.9rem; display: block; }
-    .impl-card h3 { font-size: 0.975rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
-    .impl-card p { font-size: 0.85rem; color: var(--gray-600); }
+    .impl-card h3 { font-size: 0.975rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .impl-card p { font-size: 0.85rem; color: var(--subtext0); }
 
     /* ── Deploy banner ── */
     .deploy-section {
-      background: var(--navy); border-radius: 16px;
-      padding: 3rem; text-align: center; color: #fff;
+      background: var(--surface0); border-radius: 16px; border: 1px solid var(--surface1);
+      padding: 3rem; text-align: center; color: var(--text);
     }
     .deploy-section h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; }
-    .deploy-section p { color: #94a3b8; margin-bottom: 1.75rem; max-width: 540px; margin-left: auto; margin-right: auto; font-size: 0.95rem; }
+    .deploy-section p { color: var(--subtext0); margin-bottom: 1.75rem; max-width: 540px; margin-left: auto; margin-right: auto; font-size: 0.95rem; }
     .deploy-section p { margin-bottom: 1.75rem; }
     .deploy-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
     .curl-block {
-      text-align: left; background: rgba(255,255,255,0.06); border-radius: 8px;
+      text-align: left; background: var(--mantle); border-radius: 8px;
       padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.78rem;
-      color: #e2e8f0; max-width: 620px; margin: 0 auto; overflow-x: auto;
-      line-height: 1.7; border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); max-width: 620px; margin: 0 auto; overflow-x: auto;
+      line-height: 1.7; border: 1px solid var(--surface1);
     }
-    .curl-block .comment { color: #94a3b8; }
+    .curl-block .comment { color: var(--overlay1); }
 
     /* ── Footer ── */
     footer {
-      background: var(--navy); color: rgba(255,255,255,0.45);
+      background: var(--crust); color: var(--overlay1);
       padding: 2.5rem 2rem; text-align: center; font-size: 0.85rem;
     }
-    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
-    footer a:hover { color: #fff; }
+    footer a { color: var(--subtext0); text-decoration: none; }
+    footer a:hover { color: var(--text); }
     .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
-    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2rem auto; max-width: 960px; }
+    .footer-divider { border: none; border-top: 1px solid var(--surface0); margin: 2rem auto; max-width: 960px; }
 
     /* ── Responsive ── */
     @media (max-width: 720px) {
@@ -532,11 +545,11 @@ Content-Type: application/json
         </a>
       </div>
 
-      <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.75rem;">Docker (quickest):</p>
+      <p style="font-size:0.8rem; color:var(--overlay1); margin-bottom:0.75rem;">Docker (quickest):</p>
       <div class="curl-block">docker build -t agentic-http-demo examples/live-api
 docker run -p 3000:3000 agentic-http-demo</div>
 
-      <p style="font-size:0.8rem; color:#64748b; margin: 1rem 0 0.75rem;">Then try it:</p>
+      <p style="font-size:0.8rem; color:var(--overlay1); margin: 1rem 0 0.75rem;">Then try it:</p>
       <div class="curl-block"><span class="comment"># Standard call — no agent-meta returned</span>
 curl http://localhost:3000/users
 
